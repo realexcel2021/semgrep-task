@@ -7,14 +7,14 @@ phases:
 
   pre_build:
     commands:
+      - echo login to Dockerhub...
+      - docker login -u $USERNAME -p $PASSWORD
+
       - echo Pipeline Started.....
       - echo pull semgrep image for testing....
       - docker pull semgrep/semgrep
       - echo semgrep version....
       - docker run --rm semgrep/semgrep semgrep --version  
-
-      - echo login to Dockerhub...
-      - docker login -u $USERNAME -p $PASSWORD
 
   build:
     commands:

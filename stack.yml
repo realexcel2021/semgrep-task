@@ -51,7 +51,9 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: secretsmanager.amazonaws.com
+              Service: 
+                - codebuild.amazonaws.com
+                - codepipeline.amazonaws.com
             Action: 'sts:AssumeRole'
   CodeBuildIAMRolePolicy:
     Type: 'AWS::IAM::Policy'
@@ -65,6 +67,10 @@ Resources:
               - 'secretsmanager:GetSecretValue'
             Resource: 
               - !Ref SecretManager
+          - Effect: Allow
+            Action: 
+              - "logs:*"
+            Resource: "*"
       Roles:
         - !Ref CodeBuildRole
 
