@@ -30,7 +30,7 @@ Resources:
 
           - Name: SEMGREP_APP_TOKEN 
             Type: SECRETS_MANAGER
-            Value: !Join [ ':', [!Ref SecretManager, "token"] ] # expects to retrive password from JSON object {"username": "randomName", "password": "randompass"} 
+            Value: !Join [ ':', [!Ref SecretManager, "token"] ] # expects to retrive token from JSON object {"username": "randomName", "password": "randompass"} 
     
 
         Image: aws/codebuild/standard:7.0
