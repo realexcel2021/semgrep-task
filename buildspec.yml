@@ -1,0 +1,32 @@
+version: 0.2
+
+phases:
+  # install:
+  #   runtime-versions:
+  #     java: corretto11
+
+  pre_build:
+    commands:
+      - echo Pipeline Started.....
+      - echo pull semgrep image for testing....
+      - docker pull semgrep/semgrep
+      - echo semgrep version....
+      - docker run --rm semgrep/semgrep semgrep --version  
+
+      - echo login to Dockerhub...
+      - docker login -u $USERNAME -p $PASSWORD
+
+  build:
+    commands:
+      - echo first execute test on code base....
+      - docker run -e SEMGREP_APP_TOKEN=$YOUR_TOKEN --rm -v "${PWD}:/src" semgrep/semgrep semgrep ci
+
+      - echo Build started on `date`
+      - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_NAME:$IMAGE_TAG $USERNAME/$IMAGE_NAME:$IMAGE_TAG
+
+  post_build:
+    commands:
+      - echo pushing image....
+      - docker push $USERNAME/$IMAGE_NAME:$IMAGE_TAG
+      - echo build completed successfully...

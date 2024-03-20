@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stack to create Secrets manager and Codebuild with it's configuration.
+
+Resources:
+  # codebuild project itself
+  CodeBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts: 
+        Type: NO_ARTIFACTS
+      Description: Cloud build pipeline to Build and push a sample node js app to Dockerhub
+
+      Environment: 
+        EnvironmentVariables: 
+          - Name: IMAGE_NAME
+            Type: PLAINTEXT
+            Value: express-app
+
+          - Name: IMAGE_TAG
+            Type: PLAINTEXT
+            Value: latest
+
+          - Name: USERNAME 
+            Type: SECRETS_MANAGER
+            Value: !Join [ ':', [!Ref SecretManager, "username"] ] # expects to retrive username from JSON object {"username": "randomName", "password": "randompass"} 
+
+          - Name: PASSWORD 
+            Type: SECRETS_MANAGER
+            Value: !Join [ ':', [!Ref SecretManager, "password"] ] # expects to retrive password from JSON object {"username": "randomName", "password": "randompass"} 
+  
+
+        Image: aws/codebuild/standard:7.0
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+
+      Name: Nodejs_Build
+
+      ServiceRole: !GetAtt CodeBuildRole.Arn 
+      Source: 
+        Location: https://github.com/realexcel2021/semgrep-task
+        Type: GITHUB
+
+  # IAM role for codebuild project
+
+  CodeBuildRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: MySecretsManagerRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: secretsmanager.amazonaws.com
+            Action: 'sts:AssumeRole'
+  CodeBuildIAMRolePolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: MySecretsManagerPolicy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'secretsmanager:GetSecretValue'
+            Resource: 
+              - !Ref SecretManager
+      Roles:
+        - !Ref CodeBuildRole
+
+  SecretManager:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Secret manager to hold dockerhub user and password
+      Name: DockerCred
