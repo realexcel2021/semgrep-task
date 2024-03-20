@@ -27,7 +27,11 @@ Resources:
           - Name: PASSWORD 
             Type: SECRETS_MANAGER
             Value: !Join [ ':', [!Ref SecretManager, "password"] ] # expects to retrive password from JSON object {"username": "randomName", "password": "randompass"} 
-  
+
+          - Name: SEMGREP_APP_TOKEN 
+            Type: SECRETS_MANAGER
+            Value: !Join [ ':', [!Ref SecretManager, "token"] ] # expects to retrive password from JSON object {"username": "randomName", "password": "randompass"} 
+    
 
         Image: aws/codebuild/standard:7.0
         ComputeType: BUILD_GENERAL1_SMALL
@@ -45,7 +49,7 @@ Resources:
   CodeBuildRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: MySecretsManagerRole
+      RoleName: CodebuildSecretsManagerRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -58,7 +62,7 @@ Resources:
   CodeBuildIAMRolePolicy:
     Type: 'AWS::IAM::Policy'
     Properties:
-      PolicyName: MySecretsManagerPolicy
+      PolicyName: CodebuildSecretsManagerPolicy
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
